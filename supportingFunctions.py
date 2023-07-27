@@ -1,19 +1,24 @@
 """
-Created on Aug 6th, 2018
+Created on  2023
 
 This file contains some supporting functions used during training and testing.
 
-@author:Hemant
+@author:Dan
 """
 import time
 import numpy as np
 import h5py as h5
+import scipy.io
+
+
 
 #%%
 def div0( a, b ):
     """ This function handles division by zero """
     c=np.divide(a, b, out=np.zeros_like(a), where=b!=0)
+    #print('olololo')
     return c
+
 
 #%% This provide functionality similar to matlab's tic() and toc()
 def TicTocGenerator():
@@ -37,8 +42,8 @@ def toc(tempBool=True):
 def tic():
     # Records a time in TicToc, marks the beginning of a time interval
     toc(False)
-#%%
 
+#%%
 def normalize01(img):
     """
     Normalize the image between o and 1
@@ -50,21 +55,15 @@ def normalize01(img):
         r,c=img.shape
         img=np.reshape(img,(nimg,r,c))
     img2=np.empty(img.shape,dtype=img.dtype)
+    print (img.dtype,'dtype')
     for i in range(nimg):
-        img2[i]=div0(img[i]-img[i].min(),img[i].ptp())
+        k =div0(img[i]-img[i].min(),img[i].ptp())
+        #print ('normalize0', k.dtype,img2[i].dtype)
+        img2[i] = k
         #img2[i]=(img[i]-img[i].min())/(img[i].max()-img[i].min())
     return np.squeeze(img2).astype(img.dtype)
-
 #%%
-def np_crop(data, shape=(320,320)):
 
-    w_from = (data.shape[-2] - shape[0]) // 2
-    h_from = (data.shape[-1] - shape[1]) // 2
-    w_to = w_from + shape[0]
-    h_to = h_from + shape[1]
-    return data[..., w_from:w_to, h_from:h_to]
-
-#%%
 
 def myPSNR(org,recon):
     """ This function calculates PSNR between the original and
@@ -75,88 +74,131 @@ def myPSNR(org,recon):
 
 
 #%% Here I am reading the dataset for training and testing from dataset.hdf5 file
+# def getA():
+#     #mat_radar = scipy.io.loadmat('../radar_data_20230514/An.mat')
+#     mat_radar = scipy.io.loadmat('../CNN_materials/An.mat')
+#     A_radar= mat_radar['HNNN']
+#     print ('A shape',A_radar.shape())
+#     #A_radar = np.ones((10,40))
+#     return A_radar
 
-def getData(trnTst='testing',num=100,sigma=.01):
-    #num: set this value between 0 to 163. There are total testing 164 slices in testing data
-    print('Reading the data. Please wait...')
-    filename='dataset.hdf5' #set the correct path here
-    #filename='/Users/haggarwal/datasets/piData/dataset.hdf5'
 
-    tic()
-    with h5.File(filename) as f:
-        if trnTst=='training':
-            org,csm,mask=f['trnOrg'][:],f['trnCsm'][:],f['trnMask'][:]
-        else:
-            org,csm,mask=f['tstOrg'][num],f['tstCsm'][num],f['tstMask'][num]
-            na=np.newaxis
-            org,csm,mask=org[na],csm[na],mask[na]
-    toc()
-    print('Successfully read the data from file!')
-    print('Now doing undersampling....')
-    tic()
-    atb=generateUndersampled(org,csm,mask,sigma)
-    toc()
-    print('Successfully undersampled data!')
-    if trnTst=='testing':
-        atb=c2r(atb)
-    return org,atb,csm,mask
 
-#Here I am reading one single image from  demoImage.hdf5 for testing demo code
-def getTestingData():
-    print('Reading the data. Please wait...')
-    filename='demoImage.hdf5' #set the correct path here
-    tic()
-    with h5.File(filename,'r') as f:
-        org,csm,mask=f['tstOrg'][:],f['tstCsm'][:],f['tstMask'][:]
 
-    toc()
-    print('Successfully read the data from file!')
-    print('Now doing undersampling....')
-    tic()
-    atb=generateUndersampled(org,csm,mask,sigma=.01)
-    atb=c2r(atb)
-    toc()
-    print('Successfully undersampled data!')
-    return org,atb,csm,mask
 
 
 #%%
-def piA(x,csm,mask,nrow,ncol,ncoil):
-    """ This is a the A operator as defined in the paper"""
-    ccImg=np.reshape(x,(nrow,ncol) )
-    coilImages=np.tile(ccImg,[ncoil,1,1])*csm;
-    kspace=np.fft.fft2(coilImages)/np.sqrt(nrow * ncol)
-    if len(mask.shape)==2:
-        mask=np.tile(mask,(ncoil,1,1))
-    res=kspace[mask!=0]
-    return res
 
-def piAt(kspaceUnder,csm,mask,nrow,ncol,ncoil):
-    """ This is a the A^T operator as defined in the paper"""
-    temp=np.zeros((ncoil,nrow,ncol),dtype=np.complex64)
-    if len(mask.shape)==2:
-        mask=np.tile(mask,(ncoil,1,1))
+def getTestingData():
+    print('Reading the data. Please wait...')
+#    filename='demoImage.hdf5' #set the correct path here
+    tic()
+    mat_radar = scipy.io.loadmat('../CNN_materials/An.mat')
+    A_radar = mat_radar['HNNN']
+    xmat = scipy.io.loadmat('../CNN_materials/x.mat')
+    org_radar = xmat['x']
+    toc()
+    print('Successfully read the data from file!')
+    print('Now doing undersampling....')
+    tic()
 
-    temp[mask!=0]=kspaceUnder
-    img=np.fft.ifft2(temp)*np.sqrt(nrow*ncol)
-    coilComb=np.sum(img*np.conj(csm),axis=0).astype(np.complex64)
-    #coilComb=coilComb.ravel();
-    return coilComb
+    
+    org_radarSampleNo = 120
+    
+    
+    org_radarSample = np.tile(org_radar[org_radarSampleNo],(1,1,1))  
+    A_radar_Iterable = np.tile(A_radar,(1,1,1,1)) 
+    #print ('in test', org_radarSample.shape, org_radarSample.dtype)
+    
+    atb_radar = radar_forward (A_radar,org_radarSample)
+    atb_radar=c2r(atb_radar)
+    toc()
+    print('Successfully undersampled data!')
+    return org_radarSample,atb_radar,A_radar_Iterable
 
-def generateUndersampled(org,csm,mask,sigma=0.):
-    nSlice,ncoil,nrow,ncol=csm.shape
-    atb=np.empty(org.shape,dtype=np.complex64)
-    for i in range(nSlice):
-        A  = lambda z: piA(z,csm[i],mask[i],nrow,ncol,ncoil)
-        At = lambda z: piAt(z,csm[i],mask[i],nrow,ncol,ncoil)
+#%%
 
-        sidx=np.where(mask[i].ravel()!=0)[0]
-        nSIDX=len(sidx)
-        noise=np.random.randn(nSIDX*ncoil,)+1j*np.random.randn(nSIDX*ncoil,)
-        noise=noise*(sigma/np.sqrt(2.))
-        y=A(org[i]) + noise
-        atb[i]=At(y)
-    return atb
+def getData(trnTst='testing',num=100,sigma=.01):
+    #num: set this value between 0 to 163. There are total testing 164 slices in testing data
+
+ 
+
+    tic()
+    print('Reading the data. Please wait...')    
+    #mat_radar = scipy.io.loadmat('../radar_data_20230514/An.mat')
+    mat_radar = scipy.io.loadmat('../CNN_materials/An.mat')
+    #print (mat_radar.keys())
+    #print (mat_radar['Hn'].shape)
+    A_radar = mat_radar['HNNN']
+    #A_radar = np.ones((10,40))
+    
+    ## deleted functions "normalize & div0" may be needed to apply
+    ### creating org data : meaning x in Ax=b
+    #org_radar= 0   #  it must be a 4691*1  a+bj with relevant characteristics
+
+
+    xmat = scipy.io.loadmat('../CNN_materials/x.mat')
+    #print (xmat['x'])
+    org_radar = xmat['x']
+    radar_Test_real = np.random.randn(num, 40, 1 )
+    radar_Test_imaginary = np.random.randn(num, 40, 1 )
+    #org_radar= radar_Test_real + 1j*radar_Test_imaginary
+    #print (org_radar[20][4200][0])
+    
+    ###some org examples from MRI
+    ##(-0.15748274+0.28943804j)     org[0][100][99]
+    ##(-0.14326578+0.37293863j)     org[0][99][100]
+    ##(-0.13069792+0.23481318j)     org[0][100][100]
+    ##(-0.11545675+0.22066297j)     org[0][100][101]
+    print (A_radar.shape,xmat['x'].shape[0])
+    #A_radar = np.tile(A_radar,(xmat['x'].shape[0],A_radar.shape[0],A_radar.shape[1],A_radar.shape[2]))
+    #A_radar = np.repeat(A_radar, [150, 451, 121,61])
+    A_radar = np.tile(A_radar,(xmat['x'].shape[0],1,1,1))
+    print (A_radar.shape)
+    toc()
+    
+    
+    tic()    
+    print('Successfully read the data from file!')
+    print('Now doing radar forward....')
+
+
+    atb_radar = radar_forward(A_radar[0],org_radar)    
+
+    toc()
+    print('Successfully undersampled data!')
+
+## ??
+    if trnTst=='testing':
+        atb_radar=c2r(atb_radar)
+
+    return org_radar,atb_radar,A_radar
+
+
+
+#%%
+def radar_forward(A_radar,org_radar):
+    print ("in radar_forward", org_radar.shape, A_radar.shape)
+    radar_atb=np.empty(org_radar.shape,dtype=np.complex64)
+    nImages,_,_ = org_radar.shape
+    for i in range(nImages):
+        ## construct relevant noise
+        #noise = np.random.randn(10,1)
+        AFlat = np.reshape(A_radar, [451, 7381])
+        OrgFlat = np.reshape(org_radar[i], [7381, 1])
+        Ax = np.matmul(AFlat, OrgFlat)
+        noise = np.random.random_sample(Ax.shape)
+        b = Ax+noise*(0.01/np.sqrt(2.))
+        AT = np.transpose(AFlat)
+        #print (AT.shape,b.shape)
+        
+        aTbFlat = np.matmul(AT, b)
+        radar_atb[i] = np.reshape(aTbFlat, [121, 61])
+    print ('ATb shape ', radar_atb.shape)    
+    return(radar_atb)
+
+
+
 
 
 #%%
@@ -269,4 +311,3 @@ def assignWts(sess1,nLay,wts):
         if len(tfv2)!=0 and len(npv2)!=0:
             sess1.run(tfv2[0].assign(wts[npv2[0]]))
     return sess1
-
