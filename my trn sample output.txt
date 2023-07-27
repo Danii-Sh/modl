@@ -1,0 +1,66 @@
+*************************************************
+before dc  <dtype: 'complex64'>
+*** (None, 121, 61, 2)
+(None, 121, 61, 2)
+(None, 121, 61, 2)
+!!! (None, 121, 61, 2)
+??? (None, 451, 121, 61) (None, 121, 61, 2)
+rhs shape (121, 61)
+WARNING:tensorflow:You are casting an input of type complex64 to an incompatible dtype float32.  This will discard the imaginary part and may not be what you intended.
+kkkkkkkokokokokokok
+inside myATA, A img (451, 121, 61) (121, 61)
+inside myATA, both flat (451, 7381) (1, 7381)
+inside myATA, AF Arhs (451, 7381) (451, 1)
+(7381, 1) (1, 7381) ()
+Tensor("myModel/Wts/Complex:0", shape=(), dtype=complex64)
+myATA finished (1, 7381)
+WARNING:tensorflow:You are casting an input of type complex64 to an incompatible dtype float32.  This will discard the imaginary part and may not be what you intended.
+C:\Users\Daniel Sh\Desktop\Study\Working Papers\Mamadreza AI signal processing\mri-master (tensor)\model.py:31: UserWarning: `tf.layers.batch_normalization` is deprecated and will be removed in a future version. Please use `tf.keras.layers.BatchNormalization` instead. In particular, `tf.control_dependencies(tf.GraphKeys.UPDATE_OPS)` should not be used (consult the `tf.keras.layers.BatchNormalization` documentation).
+  xbn=tf.layers.batch_normalization(x,training=trainning,fused=True,name='BN')
+WARNING:tensorflow:You are casting an input of type complex64 to an incompatible dtype float32.  This will discard the imaginary part and may not be what you intended.
+testing model saved:savedModels/21Jul_0118PM_5L_1K_50E_AG/modelTst
+Reading the data. Please wait...
+(451, 121, 61) 150
+(150, 451, 121, 61)
+Elapsed time: 3.363399 seconds.
+
+Successfully read the data from file!
+Now doing radar forward....
+in radar_forward (150, 121, 61) (451, 121, 61)
+ATb shape  (150, 121, 61)
+Elapsed time: 1.161766 seconds.
+
+Successfully undersampled data!
+0000000000000 (150, 121, 61, 2) (150, 121, 61, 2) (150, 451, 121, 61)
+321 (None, None, None, None)
+debugging23232323 150
+<_TensorSliceDataset element_spec=(TensorSpec(shape=(None, None, 2), dtype=tf.float32, name=None), TensorSpec(shape=(None, None, 2), dtype=tf.float32, name=None), TensorSpec(shape=(None, None, None), dtype=tf.complex64, name=None))>
+000 (None, None, None, 2) (None, None, None, 2) (None, None, None, None)
+before dc  <dtype: 'complex64'>
+*** (None, None, None, 2)
+(None, None, None, 2)
+(None, None, None, 2)
+!!! (None, None, None, 2)
+??? (None, None, None, None) (None, None, None, 2)
+rhs shape (None, None)
+WARNING:tensorflow:You are casting an input of type complex64 to an incompatible dtype float32.  This will discard the imaginary part and may not be what you intended.
+kkkkkkkokokokokokok
+inside myATA, A img (None, None, None) (None, None)
+inside myATA, both flat (451, 7381) (1, 7381)
+inside myATA, AF Arhs (451, 7381) (451, 1)
+(7381, 1) (1, 7381) ()
+Tensor("myModel/Wts/Complex:0", shape=(), dtype=complex64)
+myATA finished (1, 7381)
+WARNING:tensorflow:You are casting an input of type complex64 to an incompatible dtype float32.  This will discard the imaginary part and may not be what you intended.
+WARNING:tensorflow:You are casting an input of type complex64 to an incompatible dtype float32.  This will discard the imaginary part and may not be what you intended.
+working on loss  (None, None, None, 2) (None, None, None, 2)
+training started at 21-Jul-2023 01:18 PM
+parameters are: Epochs: 50  BS: 1 nSteps: 7500 nSamples: 150
+debugging555555555555555
+888 (None, None, None, 2) (150, 121, 61, 2) (None, None, None, None) (150, 451, 121, 61)
+123456789
+Model meta graph saved in::savedModels/21Jul_0118PM_5L_1K_50E_AG/model
+100%|██████████| 7500/7500 [1:15:26<00:00,  1.66it/s]
+Trianing completed in minutes  75.96348660786947
+training completed at 21-Jul-2023 02:33 PM
+*************************************************
