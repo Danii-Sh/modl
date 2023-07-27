@@ -46,7 +46,7 @@ This image gives an overview of the model, focusing on the previous applicaiton,
 #### Dependencies
 
 We have tested the code in Anaconda python 2.7 and 3.6. The code should work with Tensorflow-1.7 onwards.
-Our code requires the `scipy.io` library to open matlab dataset.
+Our code requires the `scikit-rf` library to open s2p dataset.
 
 It can be installed using the command:
 `pip install scikit-rf`
@@ -57,49 +57,15 @@ It can be installed using:
 
 In addition, matplotlib is required to visualize the output images.
 
-#### Brain Dataset
+#### SAR Dataset
 
-This git repository also includes a single image in the file `demoImage.hdf5`. The testing script `tstDemo.py` will use this image by default and does not require full data download for the testing purpose.
-
-We have released the parallel imaging dataset used in this paper. You can download the full dataset from the below link:
-
- **Download Link** :  https://drive.google.com/file/d/1qp-l9kJbRfQU1W5wCjOQZi7I3T6jwA37/view?usp=sharing
-
-You will need the file `dataset.hdf5` to run the training code `trn.py`. You can download the dataset from the link provided above. Please ignore the future warning by python. You do not need to download the `dataset.hdf5` for testing purpose.
-
-
-This dataset consist of parallel magnetic resonance imaging (MRI) brain data of five human subjects. Four of which are used during training of the model and fifth subject is used during testing.
-Above link contain fully sampled preprocessed data in numpy format for both training and testing. We also provide coil-sensitity-maps (CSM) pre-computed using E-SPIRIT algorithm. Total file size is 3 GB and contains following arrays:
-
-`trnOrg`: This is complex arrary of 256x232x360 containing 90 slices from each of the 4 training subjects. 
-        Each slice is of  spatial dimension 256x232. This is the original fully sampled data.
-        
-`trnCSM`: This is a complex array of 256x232x12x360 representing coil sensitity maps (csm). Here 12 represent number of coils.
-
-`trnMask`: This is the random undersampling mask to do 6-fold acceleration. We use different mask for different slices.
-
-`tstOrg`,`tstCSM`, `tstMask`: These are similar arrays for testing purpose. There are total 164 testing images.
-
-The undersampling mask, for both training and testing cases, is shared corresponding to 6-fold acceleration case. 
-
-#### How to run the code
-
-First, ensure that Tensorflow 1.7 or higher version is installed and working with GPU. 
-Second, just clone or download this reporsitory. The `tstDemo.py` file should run without any changes in the code.
-On the command prompt `CD` to this `modl` directory i.e. the directory containig `tstDemo.py`.
-Then you can run the test code using the command: 
-
-`$python tstDemo.py` from the command prompt. 
-
-#### Knee Dataset
-The MoDL architecture can be trained using Knee datasets freely available from other sources. The directory `knee_trained_MoDL` contains a trained model on Knee data. Here we performed the training with a structured mask that is kept same for all the slices during training. The file `knee_demo_data.h5` contains one raw image, mask, as we as coil sensitivity maps corresponding to a single slice from a particular subject for demo purpose only. 
-Just use the command `$python knee_demo_code.py` to see the performance of the MoDL on Knee dataset.
+The dataset is witheld until the work is finalized.
 
 
 
 
 #### Files description
-The folder `savedModels` contain the learned tensorflow model parameters. `tstDemo.py` will use it to read the model and run on the demo image in the file `demoImage.hdf5`. 
+The folder `savedModels` contain the learned tensorflow model parameters. `tstDemo.py` will use it to read the model and run on the demo image. 
 
 `supportingFunctions.py`: This file contain some supporting functions to calculate the time, PSNR, and read the dataset.
 
@@ -109,9 +75,5 @@ The folder `savedModels` contain the learned tensorflow model parameters. `tstDe
 `trn.py`: This is the training code
 
 `tstDemo.py`: This is the testing code
-
-
-#### Contact
-The code is provided to support reproducible research. If the code is giving syntax error in your particular python configuration or some files are missing then you may open an issue or directly email me at jnu.hemant@gmail.com
 
 
