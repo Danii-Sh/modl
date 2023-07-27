@@ -39,7 +39,7 @@ This image gives an overview of the model, focusing on the previous applicaiton,
 ![alt text](https://github.com/hkaggarwal/modl/blob/master/model_benefits.png)
 
 #### A Sample Outputs:
-![alt text]([https://raw.githubusercontent.com/hkaggarwal/modl/master/output_brain.png](https://github.com/Danii-Sh/modl/blob/4988f3d047f0ad16c66180e12adc8b85b7dbea2d/qqqq.png))
+![alt text](https://github.com/Danii-Sh/modl/blob/4988f3d047f0ad16c66180e12adc8b85b7dbea2d/qqqq.png)
 
 
 
