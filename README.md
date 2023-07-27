@@ -1,7 +1,6 @@
-This is collaboration 
-
-# MoDL
-MoDL: Model Based Deep Learning Architecture for Inverse Problems 
+This project is one of my collaborations, currently ongoing with a team from university of KTH.
+The work is to develop an AI model to implement denoising and data transfer function section of inverse problem.
+The work is based on a previous model proposed by H.K. Aggrawal as followed:
 
 ### Reference paper: 
 
@@ -11,7 +10,9 @@ Link: https://arxiv.org/abs/1712.02862
 
 IEEE Xplore: https://ieeexplore.ieee.org/document/8434321/
 
-Presentation:  https://github.com/hkaggarwal/modl/blob/master/MoDL_ppt.pdf
+The team is in charge of the RF system, while my contribution is on developing the AI framework.
+The imaging setup, antenna and SAR dataset is provided by colleagues as I have refined the model to fit our specific challenge.
+The work is still under development and is being expanded.
 
 #### What this code do:
 In the above paper, we propose a technique to combine the power of deep-learning with the model-based approaches. This code suggest how we can use a deep convolutional neural netwrok (CNN) as a regularizer to solve an optimization problem.
