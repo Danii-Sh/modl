@@ -52,13 +52,15 @@ import os,time
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 import numpy as np
 import tensorflow as tf
+tf.compat.v1.disable_eager_execution()
+
 from datetime import datetime
 from tqdm import tqdm
 import supportingFunctions as sf
 import model as mm
 
-tf.reset_default_graph()
-config = tf.ConfigProto()
+tf.compat.v1.reset_default_graph()
+config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth=True
 
 #--------------------------------------------------------------
@@ -84,7 +86,8 @@ print ('*************************************************')
 start_time=time.time()
 saveDir='savedModels/'
 cwd=os.getcwd()
-directory=saveDir+datetime.now().strftime("%d%b_%I%M%P_")+ \
+#print ((datetime.now().strftime("%d%b_%I%M%p_")))
+directory=saveDir+datetime.now().strftime("%d%b_%I%M%p_")+ \
  str(nLayers)+'L_'+str(K)+'K_'+str(epochs)+'E_'+gradientMethod
 
 if not os.path.exists(directory):
@@ -93,59 +96,97 @@ sessFileName= directory+'/model'
 
 
 #%% save test model
-tf.reset_default_graph()
+tf.compat.v1.reset_default_graph()
 
-csmT = tf.placeholder(tf.complex64,shape=(None,12,256,232),name='csm')
-maskT= tf.placeholder(tf.complex64,shape=(None,256,232),name='mask')
-atbT = tf.placeholder(tf.float32,shape=(None,256,232,2),name='atb')
+AT = tf.compat.v1.placeholder(tf.complex64,shape=(None,451,121,61),name='A')
+atbT = tf.compat.v1.placeholder(tf.float32,shape=(None,121,61,2),name='atb')
 
-out=mm.makeModel(atbT,csmT,maskT,False,nLayers,K,gradientMethod)
+
+
+out=mm.makeModel(atbT,AT,False,nLayers,K,gradientMethod)
+
+
 predTst=out['dc'+str(K)]
 predTst=tf.identity(predTst,name='predTst')
 sessFileNameTst=directory+'/modelTst'
 
-saver=tf.train.Saver()
-with tf.Session(config=config) as sess:
-    sess.run(tf.global_variables_initializer())
+
+
+saver=tf.compat.v1.train.Saver()
+with tf.compat.v1.Session(config=config) as sess:
+    sess.run(tf.compat.v1.global_variables_initializer())
     savedFile=saver.save(sess, sessFileNameTst,latest_filename='checkpointTst')
 print ('testing model saved:' +savedFile)
 #%% read multi-channel dataset
-trnOrg,trnAtb,trnCsm,trnMask=sf.getData('training')
+# trnOrg,trnAtb=sf.getData('training')
+# trnOrg,trnAtb=sf.c2r(trnOrg),sf.c2r(trnAtb)
+trnOrg,trnAtb,trnA=sf.getData('training')
 trnOrg,trnAtb=sf.c2r(trnOrg),sf.c2r(trnAtb)
+print ('0000000000000',trnOrg.shape,trnAtb.shape,trnA.shape)
+#singleA=sf.getA()
+
+#trnA = np.tile(singleA, (100,1,1))
+#trnA = np.repeat(singleA[None,:], 100, axis=0)
+#trnA = np.empty([])
+#for i in range (3):
+#  trnA = np.concatenate((singleA, singleA), axis=0)
+#print (trnA [0][200][500], trnA [5][200][500])
+#m = np.ones((100, 10, 40 ))
+#trnA= m + 1j*m
+#print('0101011',singleA.shape,trnA.shape)
 
 #%%
-tf.reset_default_graph()
-csmP = tf.placeholder(tf.complex64,shape=(None,None,None,None),name='csm')
-maskP= tf.placeholder(tf.complex64,shape=(None,None,None),name='mask')
-atbP = tf.placeholder(tf.float32,shape=(None,None,None,2),name='atb')
-orgP = tf.placeholder(tf.float32,shape=(None,None,None,2),name='org')
+tf.compat.v1.reset_default_graph()
 
+AP= tf.compat.v1.placeholder(tf.complex64,shape=(None,None,None,None),name='A')
+atbP = tf.compat.v1.placeholder(tf.float32,shape=(None,None,None,2),name='atb')
+orgP = tf.compat.v1.placeholder(tf.float32,shape=(None,None,None,2),name='org')
+print ('321', AP.shape)
 
 #%% creating the dataset
 nTrn=trnOrg.shape[0]
 nBatch= int(np.floor(np.float32(nTrn)/batchSize))
 nSteps= nBatch*epochs
+print ('debugging23232323', nTrn)
 
-trnData = tf.data.Dataset.from_tensor_slices((orgP,atbP,csmP,maskP))
+#trnData = tf.data.Dataset.from_tensor_slices((orgP,atbP,AP))
+trnData = tf.data.Dataset.from_tensor_slices((orgP,atbP,AP))
+
+print (trnData)
+#trnData = tf.data.Dataset.from_tensor_slices((trnOrg,trnAtb))
 trnData = trnData.cache()
 trnData=trnData.repeat(count=epochs)
 trnData = trnData.shuffle(buffer_size=trnOrg.shape[0])
 trnData=trnData.batch(batchSize)
 trnData=trnData.prefetch(5)
-iterator=trnData.make_initializable_iterator()
-orgT,atbT,csmT,maskT = iterator.get_next('getNext')
+# iterator=trnData.make_initializable_iterator()
+iterator = tf.compat.v1.data.make_initializable_iterator(trnData)
 
+
+#orgT,atbT,AT = iterator.get_next('getNext')
+orgT,atbT ,AT= iterator.get_next('getNext')
+#AT=AP
+
+#print (dir(trnData))
+print ('000',orgT.shape, atbT.shape,AT.shape)
 #%% make training model
+#AP= sf.getA()
+#print ('321', AP.shape)
+#print ('out of model ',AP.dtype)
+#AP = tf.cast(AP, tf.complex64)
+#print ('2 out of model ',AP.dtype)
 
-out=mm.makeModel(atbT,csmT,maskT,True,nLayers,K,gradientMethod)
+out=mm.makeModel(atbT,AT, True,nLayers,K,gradientMethod)
+
 predT=out['dc'+str(K)]
 predT=tf.identity(predT,name='pred')
+print ('working on loss ',predT.shape,orgT.shape)
 loss = tf.reduce_mean(tf.reduce_sum(tf.pow(predT-orgT, 2),axis=0))
 tf.summary.scalar('loss', loss)
-update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
 
 with tf.name_scope('optimizer'):
-    optimizer = tf.train.AdamOptimizer()
+    optimizer = tf.compat.v1.train.AdamOptimizer()
     gvs = optimizer.compute_gradients(loss)
     capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
     opToRun=optimizer.apply_gradients(capped_gvs)
@@ -154,33 +195,38 @@ with tf.name_scope('optimizer'):
 #%% training code
 
 
-print ('training started at', datetime.now().strftime("%d-%b-%Y %I:%M %P"))
+print ('training started at', datetime.now().strftime("%d-%b-%Y %I:%M %p"))
 print ('parameters are: Epochs:',epochs,' BS:',batchSize,'nSteps:',nSteps,'nSamples:',nTrn)
 
-saver = tf.train.Saver(max_to_keep=100)
+saver = tf.compat.v1.train.Saver(max_to_keep=100)
 totalLoss,ep=[],0
-lossT = tf.placeholder(tf.float32)
-lossSumT = tf.summary.scalar("TrnLoss", lossT)
-
-with tf.Session(config=config) as sess:
-    sess.run(tf.global_variables_initializer())
+lossT = tf.compat.v1.placeholder(tf.float32)
+lossSumT = tf.compat.v1.summary.scalar("TrnLoss", lossT)
+print ('debugging555555555555555')
+with tf.compat.v1.Session(config=config) as sess:
+    sess.run(tf.compat.v1.global_variables_initializer())
     if restoreWeights:
         sess=sf.assignWts(sess,nLayers,wts)
-
-    feedDict={orgP:trnOrg,atbP:trnAtb, maskP:trnMask,csmP:trnCsm}
+    print ('888',orgP.shape,trnOrg.shape,AP.shape,trnA.shape)
+    feedDict={orgP:trnOrg,atbP:trnAtb,AP:trnA}
+    
     sess.run(iterator.initializer,feed_dict=feedDict)
+    
     savedFile=saver.save(sess, sessFileName)
+    print ('123456789')
     print("Model meta graph saved in::%s" % savedFile)
 
-    writer = tf.summary.FileWriter(directory, sess.graph)
+    writer = tf.compat.v1.summary.FileWriter(directory, sess.graph)
     for step in tqdm(range(nSteps)):
         try:
             tmp,_,_=sess.run([loss,update_ops,opToRun])
+            
             totalLoss.append(tmp)
             if np.remainder(step+1,nBatch)==0:
                 ep=ep+1
                 avgTrnLoss=np.mean(totalLoss)
                 lossSum=sess.run(lossSumT,feed_dict={lossT:avgTrnLoss})
+                
                 writer.add_summary(lossSum,ep)
                 totalLoss=[] #after each epoch empty the list of total loos
         except tf.errors.OutOfRangeError:
@@ -190,8 +236,7 @@ with tf.Session(config=config) as sess:
 
 end_time = time.time()
 print ('Trianing completed in minutes ', ((end_time - start_time) / 60))
-print ('training completed at', datetime.now().strftime("%d-%b-%Y %I:%M %P"))
+print ('training completed at', datetime.now().strftime("%d-%b-%Y %I:%M %p"))
 print ('*************************************************')
 
 #%%
-
