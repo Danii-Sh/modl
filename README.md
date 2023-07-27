@@ -21,13 +21,16 @@ This code solves the following optimization problem:
 
      argmin_x ||Ax-b||_2^2 + ||x-Dw(x)||^2_2 
 
- `A` can be any measurement operator. Here we consider parallel imaging problem in MRI where
- the `A` operator consists of undersampling mask, FFT, and coil sensitivity maps.
+ `A` can be any measurement operator.
 
 `Dw(x)`: it represents the denoiser using a residual learning CNN.
 
 #### Recursive MoDL architecture:
+
+This image gives an overview of the model, focusing on the previous applicaiton, which is changed for our purpose:
+
 ![alt text](https://github.com/hkaggarwal/modl/blob/master/MoDL_recursive.png)
+
 
 #### Main benefits of the MoDL:
 1. One of the first deep model that works with parallel MRI data.
@@ -35,12 +38,9 @@ This code solves the following optimization problem:
 3. Needs less training data because of weight sharing across MoDL iterations.
 ![alt text](https://github.com/hkaggarwal/modl/blob/master/model_benefits.png)
 
-#### Output on the Brain data:
-![alt text](https://raw.githubusercontent.com/hkaggarwal/modl/master/output_brain.png)
+#### A Sample Outputs:
+![alt text]([https://raw.githubusercontent.com/hkaggarwal/modl/master/output_brain.png](https://github.com/Danii-Sh/modl/blob/4988f3d047f0ad16c66180e12adc8b85b7dbea2d/qqqq.png))
 
-#### Output on the Knee data:
-The output GIF is showing the reconstructions from  10 iterations of alternating minimization as described in the MoDL paper.
-![knee results](https://github.com/hkaggarwal/modl/blob/master/output_knee.gif)
 
 
 #### Dependencies
