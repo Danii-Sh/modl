@@ -46,7 +46,11 @@ This image gives an overview of the model, focusing on the previous applicaiton,
 #### Dependencies
 
 We have tested the code in Anaconda python 2.7 and 3.6. The code should work with Tensorflow-1.7 onwards.
-Our code requires the 'scipy.io' library to open matlab dataset.
+Our code requires the `scipy.io` library to open matlab dataset.
+
+It can be installed using the command:
+`pip install scikit-rf`
+
 The training code requires tqdm library. It is a nice library that is helpful in tracking the training progress.
 It can be installed using:
 `conda install tqdm`
