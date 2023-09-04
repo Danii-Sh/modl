@@ -30,6 +30,7 @@ This code solves the following optimization problem:
 This image gives an overview of the model, focusing on the previous applicaiton, which is changed for our purpose:
 
 ![alt text](https://github.com/hkaggarwal/modl/blob/master/MoDL_recursive.png)
+![alt text](https://github.com/Danii-Sh/modl/blob/master/MoDL_recursive%20copy.png)
 
 
 #### Main benefits of the MoDL:
